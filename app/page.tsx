@@ -1,65 +1,135 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useCallback } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import LockScreen from "./components/LockScreen";
+import Desktop from "./components/Desktop";
+import Taskbar from "./components/Taskbar";
+import Window from "./components/Window";
+import { useWindowManager } from "./hooks/useWindowManager";
+import AboutFolder from "./components/folders/AboutFolder";
+import ProjectsFolder from "./components/folders/ProjectsFolder";
+import TechsFolder from "./components/folders/TechsFolder";
+import ContactFolder from "./components/folders/ContactFolder";
+
+const FOLDER_CONFIG: Record<string, { title: string; icon: string; width: number; height: number; isMaximized?: boolean }> = {
+  about: { title: "About Me", icon: "👤", width: 800, height: 600, isMaximized: true },
+  projects: { title: "Projects", icon: "💼", width: 680, height: 560 },
+  techs: { title: "Techs", icon: "⚡", width: 620, height: 540 },
+  contact: { title: "Contact", icon: "✉️", width: 560, height: 480 },
+};
+
+const FOLDER_COMPONENTS: Record<string, () => React.JSX.Element> = {
+  about: () => <AboutFolder />,
+  projects: () => <ProjectsFolder />,
+  techs: () => <TechsFolder />,
+  contact: () => <ContactFolder />,
+};
 
 export default function Home() {
+  const [isLocked, setIsLocked] = useState(true);
+  const [isShuttingDown, setIsShuttingDown] = useState(false);
+  const { windows, openWindow, closeWindow, minimizeWindow, maximizeWindow, focusWindow, updatePosition } = useWindowManager();
+
+  const handleUnlock = useCallback(() => {
+    setIsLocked(false);
+  }, []);
+
+  const handleOpenFolder = useCallback(
+    (folderId: string) => {
+      const config = FOLDER_CONFIG[folderId];
+      if (!config) return;
+
+      // Stagger window positions so they don't stack exactly
+      const existingCount = windows.length;
+      const offset = existingCount * 30;
+
+      openWindow({
+        id: folderId,
+        title: config.title,
+        icon: config.icon,
+        component: folderId,
+        x: 120 + offset,
+        y: 60 + offset,
+        width: config.width,
+        height: config.height,
+        isMaximized: config.isMaximized,
+      });
+    },
+    [openWindow, windows.length]
+  );
+
+  const handleShutdown = useCallback(() => {
+    setIsShuttingDown(true);
+    setTimeout(() => {
+      setIsShuttingDown(false);
+      setIsLocked(true);
+    }, 2500);
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main className="w-screen h-screen overflow-hidden bg-[var(--win-bg)]">
+      {/* Lock Screen */}
+      <AnimatePresence>
+        {isLocked && !isShuttingDown && (
+          <motion.div
+            key="lock"
+            exit={{ y: "-100vh", opacity: 0 }}
+            transition={{ type: "spring", stiffness: 80, damping: 18 }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <LockScreen onUnlock={handleUnlock} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Desktop + Taskbar */}
+      {!isLocked && !isShuttingDown && (
+        <>
+          <Desktop onOpenFolder={handleOpenFolder} />
+
+          {/* Windows */}
+          {windows.map((win) => {
+            const ContentComponent = FOLDER_COMPONENTS[win.component];
+            if (!ContentComponent) return null;
+
+            return (
+              <Window
+                key={win.id}
+                window={win}
+                onClose={() => closeWindow(win.id)}
+                onMinimize={() => minimizeWindow(win.id)}
+                onMaximize={() => maximizeWindow(win.id)}
+                onFocus={() => focusWindow(win.id)}
+                onUpdatePosition={(x, y) => updatePosition(win.id, x, y)}
+              >
+                <ContentComponent />
+              </Window>
+            );
+          })}
+
+          <Taskbar
+            windows={windows}
+            onFocusWindow={focusWindow}
+            onShutdown={handleShutdown}
+          />
+        </>
+      )}
+
+      {/* Shutdown Animation */}
+      <AnimatePresence>
+        {isShuttingDown && (
+          <motion.div
+            key="shutdown"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="shutdown-screen"
           >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            <div className="shutdown-spinner" />
+            <p className="text-sm text-white/60 font-medium tracking-wider">Shutting down...</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </main>
   );
 }

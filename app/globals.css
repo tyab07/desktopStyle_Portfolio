@@ -1,26 +1,302 @@
 @import "tailwindcss";
 
+/* ── Windows 11 Inspired Design System ── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --win-bg: #0a0e1a;
+  --win-surface: rgba(30, 35, 55, 0.75);
+  --win-surface-hover: rgba(45, 52, 78, 0.8);
+  --win-accent: #0078d4;
+  --win-accent-light: #60cdff;
+  --win-border: rgba(255, 255, 255, 0.08);
+  --win-border-hover: rgba(255, 255, 255, 0.15);
+  --win-text: #ffffff;
+  --win-text-secondary: rgba(255, 255, 255, 0.65);
+  --win-text-muted: rgba(255, 255, 255, 0.35);
+  --win-titlebar: rgba(20, 25, 40, 0.92);
+  --win-taskbar: rgba(15, 18, 30, 0.85);
+  --win-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+  --win-radius: 8px;
+  --win-radius-lg: 12px;
+
+  --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+html,
+body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  background: var(--win-bg);
+  color: var(--win-text);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ── Acrylic Glass Effect ── */
+.acrylic {
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  background: var(--win-surface);
+  border: 1px solid var(--win-border);
+}
+
+.acrylic-heavy {
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  background: rgba(15, 18, 30, 0.88);
+  border: 1px solid var(--win-border);
+}
+
+/* ── Window Chrome ── */
+.window-chrome {
+  border-radius: var(--win-radius-lg);
+  box-shadow: var(--win-shadow);
+  border: 1px solid var(--win-border);
+  overflow: hidden;
+}
+
+.titlebar-btn {
+  width: 46px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  border: none;
+  background: transparent;
+  color: var(--win-text-secondary);
+  cursor: pointer;
+}
+
+.titlebar-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--win-text);
+}
+
+.titlebar-btn.close:hover {
+  background: #c42b1c;
+  color: white;
+}
+
+/* ── Desktop Icon ── */
+.desktop-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 90px;
+  text-align: center;
+}
+
+.desktop-icon:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.desktop-icon:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.desktop-icon.selected {
+  background: rgba(0, 120, 212, 0.2);
+  outline: 1px solid rgba(0, 120, 212, 0.5);
+}
+
+/* ── Code Rain Background ── */
+.code-rain {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.code-column {
+  position: absolute;
+  top: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(0, 120, 212, 0.12);
+  white-space: pre;
+  animation: codeScroll linear infinite;
+  pointer-events: none;
+}
+
+@keyframes codeScroll {
+  0% {
+    transform: translateY(-50%);
+  }
+
+  100% {
+    transform: translateY(0%);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ── Lock Screen ── */
+.lock-clock {
+  font-size: clamp(4rem, 10vw, 8rem);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
+}
+
+.lock-date {
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* ── File/Folder List Item ── */
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.file-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.file-item:active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Start Menu ── */
+.start-menu {
+  position: fixed;
+  bottom: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 640px;
+  max-width: calc(100vw - 32px);
+  border-radius: 12px;
+  box-shadow: 0 16px 64px rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+}
+
+/* ── Taskbar ── */
+.taskbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  z-index: 9990;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+}
+
+.taskbar-app {
+  height: 40px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-size: 13px;
+  color: var(--win-text-secondary);
+}
+
+.taskbar-app:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.taskbar-app.active {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--win-text);
+}
+
+/* ── PDF Viewer ── */
+.pdf-page {
+  background: #1e1e2e;
+  border-radius: 4px;
+  padding: 40px 48px;
+  min-height: 400px;
+  font-family: var(--font-sans);
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.7;
+}
+
+/* ── Shutdown Animation ── */
+.shutdown-screen {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  color: white;
+}
+
+.shutdown-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: var(--win-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Tech logo slider ── */
+.tech-slider {
+  display: flex;
+  gap: 20px;
+  animation: slideLogos 30s linear infinite;
+}
+
+@keyframes slideLogos {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
 }
