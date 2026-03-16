@@ -47,7 +47,9 @@ Ensure your development environment meets the following requirements:
    ```bash
    git clone <your-repository-url>
    cd <project-directory>
+   
 Install dependencies
+
 
 bash
 npm install
