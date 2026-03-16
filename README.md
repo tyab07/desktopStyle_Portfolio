@@ -86,7 +86,8 @@ The development server features:
 
 🔍 Source Maps: Easy debugging
 
-📁 Project Structure
+###📁 Project Structure
+
 text
 ├── app/                          # App Router directory
 │   ├── layout.tsx               # Root layout component
